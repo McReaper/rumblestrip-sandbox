@@ -15,4 +15,4 @@ jobs:
     permissions:
       actions: write # re-run the review sheet's job
       statuses: read # the owner's approval status
-    uses: McReaper/rumblestrip-go/.github/workflows/rumblestrip-approval.yml@59ba3dec7103f3735b0c508a083381684e06c4fd # 59ba3dec7103f3735b0c508a083381684e06c4fd
+    uses: McReaper/rumblestrip-go/.github/workflows/rumblestrip-approval.yml@6e37982a5725b28f82c79f552cc895220102d685 # 6e37982a5725b28f82c79f552cc895220102d685
