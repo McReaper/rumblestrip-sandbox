@@ -30,7 +30,7 @@ jobs:
       statuses: write # the owner's approval
       actions: read # the gates' results
       id-token: write # Rumblestrip's version, read from the job's token
-    uses: McReaper/rumblestrip-go/.github/workflows/rumblestrip-check.yml@46fb95cf241d157c771a9d0cf07b65496f9e874c # v0.3.0
+    uses: McReaper/rumblestrip-go/.github/workflows/rumblestrip-check.yml@f3980b37475ac4ac1be7d5cd4e1d40c26e484ac9 # f3980b37475ac4ac1be7d5cd4e1d40c26e484ac9
     with:
       owner: McReaper
     secrets:
