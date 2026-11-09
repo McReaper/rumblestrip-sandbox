@@ -47,7 +47,7 @@ func ParseTitle(s string) (Title, error) {
 		return "", ErrEmptyTitle
 	}
 	if n := utf8.RuneCountInString(t); n > MaxTitleRunes {
-		return "", fmt.Errorf("the title has %d characters, the limit is %d", n, MaxTitleRunes)
+		return "", fmt.Errorf("the title has %d characters, which is more than %d", n, MaxTitleRunes)
 	}
 	if slug.Make(t) == "" {
 		return "", ErrNoSlugInTitle
