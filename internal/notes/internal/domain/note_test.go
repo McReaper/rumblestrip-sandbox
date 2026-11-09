@@ -43,6 +43,21 @@ func TestParseTitle(t *testing.T) {
 	})
 }
 
+func TestParseText(t *testing.T) {
+	t.Run("accepts a text of exactly the limit", func(t *testing.T) {
+		text := strings.Repeat("é", domain.MaxTextRunes)
+		if got, err := domain.ParseText(text); err != nil || got != text {
+			t.Fatalf("ParseText(%d characters) = %d characters, %v; want it back, nil", domain.MaxTextRunes, utf8.RuneCountInString(got), err)
+		}
+	})
+	t.Run("refuses a text over the limit, counted in characters", func(t *testing.T) {
+		_, err := domain.ParseText(strings.Repeat("é", domain.MaxTextRunes+1))
+		if err == nil || !strings.Contains(err.Error(), "the text has 1001 characters, the limit is 1000") {
+			t.Fatalf("err = %v, want the count and the limit", err)
+		}
+	})
+}
+
 func TestParseTitleAcceptsEveryTrimmedTitleWithinTheLimit(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		s := rapid.StringMatching(`[a-zA-Z0-9][a-zA-Z0-9 ]{0,78}[a-zA-Z0-9]`).Draw(t, "title")

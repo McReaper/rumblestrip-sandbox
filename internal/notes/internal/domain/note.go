@@ -13,6 +13,8 @@ import (
 
 const MaxTitleRunes = 80
 
+const MaxTextRunes = 1000
+
 var (
 	ErrEmptyTitle    = errors.New("the title is empty")
 	ErrNoSlugInTitle = errors.New("the title has no letter or digit to name the note by")
@@ -51,6 +53,13 @@ func ParseTitle(s string) (Title, error) {
 		return "", ErrNoSlugInTitle
 	}
 	return Title(t), nil
+}
+
+func ParseText(s string) (string, error) {
+	if n := utf8.RuneCountInString(s); n > MaxTextRunes {
+		return "", fmt.Errorf("the text has %d characters, the limit is %d", n, MaxTextRunes)
+	}
+	return s, nil
 }
 
 func New(title Title, body string, at time.Time) Note {

@@ -23,7 +23,6 @@ Feature: Notes
     When I delete the note "Groceries"
     Then the list shows 0 notes
 
-  @wip
   Scenario: A text over 1000 characters is refused
     When I add a note whose text is 1001 characters long
     Then it is refused with "the limit is 1000"

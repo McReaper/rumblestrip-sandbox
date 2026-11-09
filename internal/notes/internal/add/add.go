@@ -46,7 +46,11 @@ func (a *Add) Run(ctx context.Context, args Args) (Out, error) {
 	if err != nil {
 		return Out{}, fmt.Errorf("add a note: %w", err)
 	}
-	n := domain.New(title, args.Body, a.now())
+	body, err := domain.ParseText(args.Body)
+	if err != nil {
+		return Out{}, fmt.Errorf("add a note: %w", err)
+	}
+	n := domain.New(title, body, a.now())
 	if err := a.store.Save(ctx, n); err != nil {
 		return Out{}, fmt.Errorf("add a note: %w", err)
 	}
