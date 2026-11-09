@@ -64,6 +64,7 @@ func steps(sc *godog.ScenarioContext, bin string) {
 	})
 	sc.Step(`^I add the note "([^"]*)" with the text "([^"]*)"$`, w.addNote)
 	sc.Step(`^I add a note whose title is (\d+) characters long$`, w.addLongNote)
+	sc.Step(`^I add a note whose text is (\d+) characters long$`, w.addLongText)
 	sc.Step(`^I run "([^"]*)"$`, w.runLine)
 	sc.Step(`^the list shows the note "([^"]*)"$`, w.listShows)
 	sc.Step(`^it is refused with "([^"]*)"$`, w.refusedWith)
@@ -74,6 +75,10 @@ func steps(sc *godog.ScenarioContext, bin string) {
 
 func (w *world) addNote(ctx context.Context, title, body string) error {
 	return w.run(ctx, "add-note", "--title="+title, "--body="+body)
+}
+
+func (w *world) addLongText(ctx context.Context, n int) error {
+	return w.run(ctx, "add-note", "--title=Groceries", "--body="+strings.Repeat("x", n))
 }
 
 func (w *world) addLongNote(ctx context.Context, n int) error {
