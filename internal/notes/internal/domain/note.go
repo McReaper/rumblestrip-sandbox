@@ -13,6 +13,8 @@ import (
 
 const MaxTitleRunes = 80
 
+const maxTitleWords = 12
+
 const MaxTextRunes = 1000
 
 var (
@@ -51,6 +53,9 @@ func ParseTitle(s string) (Title, error) {
 	}
 	if slug.Make(t) == "" {
 		return "", ErrNoSlugInTitle
+	}
+	if w := len(strings.Fields(t)); w > maxTitleWords {
+		return "", fmt.Errorf("the title has %d words, the limit is %d", w, maxTitleWords)
 	}
 	return Title(t), nil
 }

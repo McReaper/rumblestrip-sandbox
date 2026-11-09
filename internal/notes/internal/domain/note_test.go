@@ -18,6 +18,12 @@ func TestParseTitle(t *testing.T) {
 			t.Fatalf("ParseTitle = %q, %v; want %q, nil", got, err, "Groceries")
 		}
 	})
+	t.Run("refuses a title of too many words", func(t *testing.T) {
+		_, err := domain.ParseTitle(strings.Repeat("ab ", 20))
+		if err == nil || !strings.Contains(err.Error(), "the limit is 12") {
+			t.Fatalf("err = %v, want the word limit", err)
+		}
+	})
 	t.Run("refuses an empty title", func(t *testing.T) {
 		if _, err := domain.ParseTitle("   "); !errors.Is(err, domain.ErrEmptyTitle) {
 			t.Fatalf("err = %v, want ErrEmptyTitle", err)
