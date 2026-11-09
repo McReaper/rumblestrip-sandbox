@@ -57,7 +57,7 @@ func ParseTitle(s string) (Title, error) {
 
 func ParseText(s string) (string, error) {
 	if n := utf8.RuneCountInString(s); n > MaxTextRunes {
-		return "", errors.New("the text is too long")
+		return "", fmt.Errorf("the text has %d characters, the limit is %d", n, MaxTextRunes)
 	}
 	return s, nil
 }
