@@ -12,3 +12,7 @@
 /docs/adr/ @McReaper
 **/GLOSSARY.md @McReaper
 
+# Inside the harness, but the agent's to change: the rereads of the docs.
+# Rumblestrip's checks hold a doc left out of them for the owner.
+
+/.rumblestrip/reread.jsonl
