@@ -10,7 +10,7 @@ notes keeps short notes for people and agents, served as MCP tools (`notes mcp`)
 - `internal/notes/internal/domain/`: the rules, pure: no I/O, no clock, no log.
 - `internal/notes/internal/add/`, `internal/notes/internal/list/`: one operation each, a vertical slice: its `Args`, its `Op` (name, description for agents, effect, example) and its tests. Slices don't import each other.
 - `internal/notes/internal/infra/`: files and other I/O, behind the interfaces the slices declare.
-- `internal/platform/`: shared by every module: the op binding, the journal, the config. It knows no module.
+- `internal/platform/`: shared by every module: the op binding, the journal, the config, and where the data lives on each system. It knows no module.
 - `pkg/slug/`: a library other programs may import: its exported API is a contract.
 
 Rumblestrip's commands and the rules no check explains come with its Claude Code plugin, `rumblestrip`, which the repository's Claude Code settings, written by `rumblestrip init`, turn on.

@@ -2,7 +2,7 @@ module github.com/McReaper/rumblestrip-sandbox
 
 go 1.26.0
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 require (
 	github.com/cucumber/godog v0.16.0
