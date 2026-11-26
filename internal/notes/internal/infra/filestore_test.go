@@ -70,6 +70,59 @@ func TestFileStoreRefusesARecordWithABadID(t *testing.T) {
 	}
 }
 
+func TestFileStoreDeletesTheNoteAlone(t *testing.T) {
+	s := open(t)
+	ctx := context.Background()
+	for i, title := range []string{"kept", "gone"} {
+		if err := s.Save(ctx, note(title, i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.Delete(ctx, note("gone", 1).ID); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.Newest(ctx, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff([]domain.Note{note("kept", 0)}, got); diff != "" {
+		t.Errorf("Newest after the delete (-want +got):\n%s", diff)
+	}
+}
+
+func TestFileStoreRefusesToDeleteANoteThatIsNotThere(t *testing.T) {
+	err := open(t).Delete(context.Background(), "groceries-20261030t220509")
+	if err == nil || err.Error() != "no note has the id groceries-20261030t220509" {
+		t.Fatalf("err = %v, want it to say no note has the id", err)
+	}
+}
+
+// WHY: a delete that fails for another reason than a missing note is
+// reported as it is, not taken for done nor for a missing note.
+func TestFileStoreReportsADeleteThatFails(t *testing.T) {
+	dir := t.TempDir()
+	s, err := infra.OpenFileStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := s.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+	busy := filepath.Join(dir, "busy.json")
+	if err := os.Mkdir(busy, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(busy, "inside"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	err = s.Delete(context.Background(), "busy")
+	if err == nil || !strings.HasPrefix(err.Error(), "delete note busy: ") {
+		t.Fatalf("err = %v, want the failure of the delete", err)
+	}
+}
+
 func TestFileStoreNeverOverwritesANote(t *testing.T) {
 	s := open(t)
 	ctx := context.Background()

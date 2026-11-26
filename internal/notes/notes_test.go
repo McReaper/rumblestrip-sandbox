@@ -107,6 +107,49 @@ func TestAnAddedNoteIsListedAndJournaled(t *testing.T) {
 	}
 }
 
+func TestADeletedNoteLeavesTheListAndIsJournaled(t *testing.T) {
+	dir := t.TempDir()
+	cs := session(t, dir)
+	ctx := context.Background()
+	for _, call := range []*mcp.CallToolParams{
+		{Name: "add_note", Arguments: map[string]any{"title": "Buy milk"}},
+		{Name: "delete_note", Arguments: map[string]any{"id": "buy-milk-20261030t220509"}},
+	} {
+		if res, err := cs.CallTool(ctx, call); err != nil || res.IsError {
+			t.Fatalf("%s = %+v, %v", call.Name, res, err)
+		}
+	}
+	listed, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "list_notes", Arguments: map[string]any{}})
+	if err != nil || listed.IsError {
+		t.Fatalf("list_notes = %+v, %v", listed, err)
+	}
+	if diff := cmp.Diff(map[string]any{"notes": []any{}}, listed.StructuredContent); diff != "" {
+		t.Errorf("list_notes after the delete (-want +got):\n%s", diff)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, journal.File))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"time":"2026-10-30T22:05:09Z","op":"add_note","args":{"title":"Buy milk"}}` + "\n" +
+		`{"time":"2026-10-30T22:05:09Z","op":"delete_note","args":{"id":"buy-milk-20261030t220509"}}` + "\n"
+	if got := string(data); got != want {
+		t.Errorf("journal = %q, want %q", got, want)
+	}
+}
+
+func TestDeletingANoteThatIsNotThereIsAToolError(t *testing.T) {
+	res, err := session(t, t.TempDir()).CallTool(context.Background(), &mcp.CallToolParams{
+		Name:      "delete_note",
+		Arguments: map[string]any{"id": "groceries-20261030t220509"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatalf("delete_note deleted a note that isn't there: %+v", res)
+	}
+}
+
 func TestATitleOverTheLimitIsAToolError(t *testing.T) {
 	res, err := session(t, t.TempDir()).CallTool(context.Background(), &mcp.CallToolParams{
 		Name:      "add_note",

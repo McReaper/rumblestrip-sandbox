@@ -71,6 +71,53 @@ func steps(sc *godog.ScenarioContext, bin string) {
 	sc.Step(`^it exits with code (\d+)$`, w.exitsWith)
 	sc.Step(`^an agent adds the note "([^"]*)"$`, w.agentAdds)
 	sc.Step(`^the agent's list shows the note "([^"]*)"$`, w.agentListShows)
+	sc.Step(`^the note "([^"]*)"$`, w.haveNote)
+	sc.Step(`^I delete the note "([^"]*)"$`, w.deleteNote)
+	sc.Step(`^the list shows (\d+) notes$`, w.listCounts)
+}
+
+// WHY: a Given the program refused would leave nothing to act on, and a Then
+// that expects nothing would pass on it: the refusal fails the step instead.
+func (w *world) haveNote(ctx context.Context, title string) error {
+	if err := w.run(ctx, "add-note", "--title="+title); err != nil {
+		return err
+	}
+	if w.last.code != 0 {
+		said, _, _ := strings.Cut(strings.TrimSpace(w.last.stderr), "\n")
+		return fmt.Errorf("add the note %q: it said %q (exit %d)", title, said, w.last.code)
+	}
+	return nil
+}
+
+// WHY: a person deletes a note they see in the list, so the step finds its
+// id there, as they would.
+func (w *world) deleteNote(ctx context.Context, title string) error {
+	if err := w.run(ctx, "list-notes"); err != nil {
+		return err
+	}
+	notes, err := listed([]byte(w.last.stdout))
+	if err != nil {
+		return err
+	}
+	i := slices.IndexFunc(notes, func(n note) bool { return n.Title == title })
+	if i < 0 {
+		return fmt.Errorf("no note %q in the list to delete", title)
+	}
+	return w.run(ctx, "delete-note", "--id="+notes[i].ID)
+}
+
+func (w *world) listCounts(ctx context.Context, n int) error {
+	if err := w.run(ctx, "list-notes"); err != nil {
+		return err
+	}
+	notes, err := listed([]byte(w.last.stdout))
+	if err != nil {
+		return err
+	}
+	if len(notes) != n {
+		return fmt.Errorf("the list shows %d notes, want %d", len(notes), n)
+	}
+	return nil
 }
 
 func (w *world) addNote(ctx context.Context, title, body string) error {
@@ -145,17 +192,28 @@ func (w *world) call(ctx context.Context, tool string, args map[string]any) ([]b
 	return json.Marshal(res.StructuredContent)
 }
 
-func listHas(data []byte, title string) error {
+type note struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+func listed(data []byte) ([]note, error) {
 	var got struct {
-		Notes []struct {
-			Title string `json:"title"`
-		} `json:"notes"`
+		Notes []note `json:"notes"`
 	}
 	if err := json.Unmarshal(data, &got); err != nil {
-		return fmt.Errorf("the list %q: %w", data, err)
+		return nil, fmt.Errorf("the list %q: %w", data, err)
+	}
+	return got.Notes, nil
+}
+
+func listHas(data []byte, title string) error {
+	notes, err := listed(data)
+	if err != nil {
+		return err
 	}
 	var titles []string
-	for _, n := range got.Notes {
+	for _, n := range notes {
 		titles = append(titles, n.Title)
 	}
 	if !slices.Contains(titles, title) {
