@@ -17,7 +17,6 @@ Feature: Notes
     When an agent adds the note "Groceries"
     Then the agent's list shows the note "Groceries"
 
-  @wip
   Scenario: A deleted note leaves the list
     Given the note "Groceries"
     When I delete the note "Groceries"

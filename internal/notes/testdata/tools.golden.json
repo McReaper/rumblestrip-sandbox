@@ -46,6 +46,46 @@
   },
   {
     "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Deletes the note with this id for good and returns its id. An id no note has is refused.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "groceries-20261030t220509"
+        }
+      ],
+      "properties": {
+        "id": {
+          "description": "the id of the note to delete, as add_note returns it and list_notes shows it",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "name": "delete_note",
+    "outputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
       "idempotentHint": false,
       "openWorldHint": false,
       "readOnlyHint": true
